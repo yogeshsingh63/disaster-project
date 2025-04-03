@@ -1,4 +1,4 @@
-# Disaster Management Platform
+# Disaster Management Platform to help the peoples
 
 A comprehensive disaster management platform that connects affected individuals, volunteers, NGOs, and administrators to coordinate disaster relief efforts.
 
