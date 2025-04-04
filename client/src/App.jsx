@@ -87,6 +87,8 @@ function App() {
                 <Layout />
               </ProtectedRoute>
             }>
+              {/* Default dashboard redirect */}
+              <Route index element={<Navigate to="/" />} />
               {/* Admin routes */}
               <Route path="admin" element={
                 <ProtectedRoute roles={['Admin']}>

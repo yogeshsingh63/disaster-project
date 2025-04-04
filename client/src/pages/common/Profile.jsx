@@ -12,11 +12,12 @@ import {
   Alert,
   Divider
 } from '@mui/material';
+import axios from 'axios';
 import PersonIcon from '@mui/icons-material/Person';
 import AuthContext from '../../context/AuthContext';
 
 export default function Profile() {
-  const { user, updateProfile, loading, error } = useContext(AuthContext);
+  const { user, updateProfile, loading: authLoading, error: authError } = useContext(AuthContext);
   const [formData, setFormData] = useState({
     name: '',
     phone: '',
@@ -30,20 +31,58 @@ export default function Profile() {
   });
   const [success, setSuccess] = useState('');
   const [localLoading, setLocalLoading] = useState(false);
+  const [profileData, setProfileData] = useState(null);
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
 
+  // Fetch profile data from API
   useEffect(() => {
-    if (user) {
-      setFormData({
-        name: user.name || '',
-        phone: user.phone || '',
-        address: {
-          street: user.address?.street || '',
-          city: user.address?.city || '',
-          state: user.address?.state || '',
-          pincode: user.address?.pincode || '',
-          country: user.address?.country || 'India'
+    async function fetchProfileData() {
+      try {
+        setLoading(true);
+        setError('');
+        const response = await axios.get('/api/users/profile');
+        if (response.data.success) {
+          setProfileData(response.data.data);
+          
+          // Update form data with fetched profile
+          const profile = response.data.data;
+          setFormData({
+            name: profile.name || '',
+            phone: profile.phone || '',
+            address: {
+              street: profile.address?.street || '',
+              city: profile.address?.city || '',
+              state: profile.address?.state || '',
+              pincode: profile.address?.pincode || '',
+              country: profile.address?.country || 'India'
+            }
+          });
         }
-      });
+      } catch (err) {
+        console.error('Error fetching profile:', err);
+        setError('Failed to load profile data. Please try again.');
+        // Fallback to context user if API fails
+        if (user) {
+          setFormData({
+            name: user.name || '',
+            phone: user.phone || '',
+            address: {
+              street: user.address?.street || '',
+              city: user.address?.city || '',
+              state: user.address?.state || '',
+              pincode: user.address?.pincode || '',
+              country: user.address?.country || 'India'
+            }
+          });
+        }
+      } finally {
+        setLoading(false);
+      }
+    }
+    
+    if (user) {
+      fetchProfileData();
     }
   }, [user]);
 
@@ -84,7 +123,7 @@ export default function Profile() {
     }
   };
 
-  if (loading) {
+  if (loading || authLoading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
         <CircularProgress />
@@ -110,15 +149,15 @@ export default function Profile() {
             )}
           </Avatar>
           <Typography component="h1" variant="h5" gutterBottom>
-            {user?.name}
+            {profileData?.name || user?.name || 'User'}
           </Typography>
           <Typography color="text.secondary" gutterBottom>
-            {user?.email} • {user?.role}
+            {profileData?.email || user?.email || 'No email'} • {profileData?.role || user?.role || 'User'}
           </Typography>
           
-          {error && (
+          {(error || authError) && (
             <Alert severity="error" sx={{ width: '100%', mt: 2 }}>
-              {error}
+              {error || authError}
             </Alert>
           )}
           

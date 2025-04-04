@@ -92,6 +92,7 @@ export const AuthProvider = ({ children }) => {
         
         localStorage.setItem('user', JSON.stringify(adminUser));
         setUser(adminUser);
+        navigate('/dashboard/admin');
         return { success: true, message: 'Admin login successful' };
       }
       
@@ -109,6 +110,7 @@ export const AuthProvider = ({ children }) => {
         
         localStorage.setItem('user', JSON.stringify(ngoUser));
         setUser(ngoUser);
+        navigate('/dashboard/ngo');
         return { success: true, message: 'NGO login successful' };
       }
       
@@ -134,6 +136,7 @@ export const AuthProvider = ({ children }) => {
         
         localStorage.setItem('user', JSON.stringify(volunteerUser));
         setUser(volunteerUser);
+        navigate('/dashboard/volunteer');
         return { success: true, message: 'Volunteer login successful' };
       }
       
@@ -151,6 +154,7 @@ export const AuthProvider = ({ children }) => {
         
         localStorage.setItem('user', JSON.stringify(affectedUser));
         setUser(affectedUser);
+        navigate('/dashboard/affected');
         return { success: true, message: 'Affected Individual login successful' };
       }
       
@@ -161,6 +165,19 @@ export const AuthProvider = ({ children }) => {
         if (response.data.success) {
           localStorage.setItem('user', JSON.stringify(response.data.user));
           setUser(response.data.user);
+          
+          // Redirect based on user role
+          const role = response.data.user.role;
+          if (role === 'Admin') {
+            navigate('/dashboard/admin');
+          } else if (role === 'NGO') {
+            navigate('/dashboard/ngo');
+          } else if (role === 'Volunteer') {
+            navigate('/dashboard/volunteer');
+          } else if (role === 'AffectedIndividual') {
+            navigate('/dashboard/affected');
+          }
+          
           return { success: true, message: response.data.message };
         }
         return { success: false, message: 'Unknown error occurred' };
